@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
 import "./map.css";
-import { data } from "./officeData";
-import { Environment } from "ag-grid-community";
 
 export default function WebMapView() {
   const mapRef = useRef();
@@ -16,11 +14,12 @@ export default function WebMapView() {
         "esri/widgets/Search",
         "esri/layers/FeatureLayer",
         "esri/Graphic",
+        "esri/widgets/Feature"
       ],
       {
         css: true,
       }
-    ).then(([ArcGISMap, MapView, Search, FeatureLayer, graphic]) => {
+    ).then(([ArcGISMap, MapView, Search, FeatureLayer, graphic, Feature]) => {
       const map = new ArcGISMap({
         basemap: "topo-vector",
         ground: "world-elevation",
@@ -38,9 +37,6 @@ export default function WebMapView() {
             ObjectID: i,
             name: item["name"],
             address: item["address"],
-            phone: item["phone"],
-            fax: item["fax"],
-            link: item["link"],
           },
         });
       });
@@ -49,8 +45,9 @@ export default function WebMapView() {
       const view = new MapView({
         container: mapRef.current,
         map: map,
-        center: [-121.49, 38.58],
+        center: [-118, 34],
         zoom: 8,
+    
       });
 
       const searchWidget = new Search({
@@ -90,11 +87,6 @@ export default function WebMapView() {
             alias: "fax",
             type: "string",
           },
-          {
-            name: "link",
-            alias: "link",
-            type: "string",
-          },
         ];
 
         const renderer = {
@@ -102,7 +94,7 @@ export default function WebMapView() {
           symbol: {
             type: "simple-marker",
             color: "#046B99",
-            size: 10,
+            size: 6,
           },
 
           outline: {
@@ -134,29 +126,51 @@ export default function WebMapView() {
                   visible: true,
                   label: "address",
                 },
-                {
-                  fieldName: "phone",
-                  visible: true,
-                  label: "phone",
-                },
-                {
-                  fieldName: "fax",
-                  visible: true,
-                  label: "fax",
-                },
-                {
-                  fieldName: "link",
-                  visible: true,
-                  label: "link",
-                },
               ],
             },
           ],
         };
         layer.popupTemplate = pop;
         map.add(layer);
-      });
+        const panel = {
+          popupTemplate: {
+            content: "Office List"
+          }
+        };
+        const panelLayer = new Feature({
+          container: "panel",
+          graphic: panel,
+          map: view.map,
+         
+        });
+        // var container = document.getElementById("panel");
+        // // container.innerHTML = data.map((item)=>{
+        // //   return `<h3>${item.name}</h3> 
+        // //               <P>${item.address}</P>`
+        // // })
+        // container.innerHTML = "";
+        let container = document.getElementById('panel');
+        data.forEach((item)=>{
 
+          let innerContainer = document.createElement('div');
+          innerContainer.className += "buttonlink"
+          
+          
+          let officeName = document.createElement('h4')
+          officeName.classname += 'title'
+          let address = document.createElement('p')
+          officeName.innerHTML =  ;
+          address.innerHTML =  ;
+          officeName.className += ''
+          innerContainer.appendChild(officeName);
+          innerContainer.appendChild(address)
+          container.appendChild(innerContainer)
+          // container.appendChild(officeName);
+          // container.appendChild(address)
+        })        
+
+
+      });
       return () => {
         if (view) {
           // destroy the map view
@@ -166,5 +180,12 @@ export default function WebMapView() {
     });
   });
 
-  return <div className="webmap" ref={mapRef} />;
+  return( 
+  <div>
+    <div className = "panel-side esri-widget ">
+    <div className = "panel" id = "panel"></div>
+    </div>
+  <div className="webmap" ref={mapRef} />
+  </div>
+  );
 }
