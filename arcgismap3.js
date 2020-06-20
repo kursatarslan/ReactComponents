@@ -165,8 +165,17 @@ export default function WebMapView() {
           innerContainer.appendChild(officeName);
           innerContainer.appendChild(address)
           container.appendChild(innerContainer)
-          // container.appendChild(officeName);
-          // container.appendChild(address)
+          // container.appendChild();
+          // container.appendChild()
+            innerContainer.addEventListener('click',(event)=>{
+           
+
+            let index =Number( event.path[1].attributes[1].nodeValue);
+             let longitude = item.longitude
+            let latitude = item.latitude
+             view.goTo({
+               center: [longitude, latitude]
+            })
         })        
 
 
