@@ -1,7 +1,3 @@
-import React, { useState, useEffect, useRef } from "react";
-import { loadModules } from "esri-loader";
-import "./map.css";
-
 export default function WebMapView() {
   const mapRef = useRef();
 
@@ -22,7 +18,7 @@ export default function WebMapView() {
     ).then(([ArcGISMap, MapView, Search, FeatureLayer, graphic, Feature]) => {
       const map = new ArcGISMap({
         basemap: "topo-vector",
-        ground: "world-elevation",
+    
       });
 
       // adding feature and using data( which is a global variable outside of this funciton)
@@ -35,8 +31,8 @@ export default function WebMapView() {
           },
           attributes: {
             ObjectID: i,
-            name: item["name"],
-            address: item["address"],
+            Office: item["Office"],
+            address: item["Address"],
           },
         });
       });
@@ -47,7 +43,10 @@ export default function WebMapView() {
         map: map,
         center: [-118, 34],
         zoom: 8,
-    
+        highlightOptions: {
+          color:'#00bef5',
+          fillOpacity: 200
+        }
       });
 
       const searchWidget = new Search({
@@ -68,23 +67,23 @@ export default function WebMapView() {
           //   type: 'oid',
           // },
           {
-            name: "name",
-            alias: "name",
+            name: "Office",
+            alias: "Office",
             type: "string",
           },
           {
-            name: "address",
-            alias: "address",
+            name: "Address",
+            alias: "Address",
             type: "string",
           },
           {
             name: "phone",
-            alias: "phone",
+            alias: "Phone",
             type: "string",
           },
           {
             name: "fax",
-            alias: "fax",
+            alias: "Fax",
             type: "string",
           },
         ];
@@ -111,18 +110,18 @@ export default function WebMapView() {
           renderer: renderer,
         });
         const pop = {
-          title: "Data",
+          title: "<h2>{Office}</h2>",
           content: [
             {
               type: "fields",
               fieldInfos: [
                 {
-                  fieldName: "name",
+                  fieldName: "Office",
                   visible: true,
-                  lable: "noLabel",
+                  lable: "Office",
                 },
                 {
-                  fieldName: "address",
+                  fieldName: "Address",
                   visible: true,
                   label: "address",
                 },
@@ -131,70 +130,92 @@ export default function WebMapView() {
           ],
         };
         layer.popupTemplate = pop;
+        // this is a popup functionality and customization, not to be confused with the popup object itself
+        view.popup = {
+          dockEnabled: true,
+          dockOptions: {
+            // Disables the dock button from the popup
+            buttonEnabled: false,
+            // Ignore the default sizes that trigger responsive docking
+            breakpoint: true
+          }
+        };
         map.add(layer);
         const panel = {
           popupTemplate: {
-            content: "Office List"
+            content: ""
           }
         };
         const panelLayer = new Feature({
           container: "panel",
           graphic: panel,
           map: view.map,
-         
+          
         });
+        let highlight;
         // var container = document.getElementById("panel");
         // // container.innerHTML = data.map((item)=>{
-        // //   return `<h3>${item.name}</h3> 
-        // //               <P>${item.address}</P>`
-        // // })
-        // container.innerHTML = "";
-        let container = document.getElementById('panel');
-        data.forEach((item)=>{
-
+          // //   return `<h3>${item.name}</h3> 
+          // //               <P>${item.address}</P>`
+          // // })
+          // container.innerHTML = "";
+          let container = document.getElementById('panel');
+          
+          data.forEach((item)=>{
+          
           let innerContainer = document.createElement('div');
-          innerContainer.className += "buttonlink"
+          innerContainer.className += 'buttonlink'
+          innerContainer.setAttribute('id',item.id)
           
-          
-          let officeName = document.createElement('h4')
+          let officeName = document.createElement('h3')
           officeName.classname += 'title'
           let address = document.createElement('p')
-          officeName.innerHTML =  ;
-          address.innerHTML =  ;
+          officeName.innerHTML =  '';
+          address.innerHTML = '';
           officeName.className += ''
           innerContainer.appendChild(officeName);
           innerContainer.appendChild(address)
           container.appendChild(innerContainer)
-          // container.appendChild();
-          // container.appendChild()
-            innerContainer.addEventListener('click',(event)=>{
-           
-
+          // container.appendChild(officeName);
+          // container.appendChild(address)
+          innerContainer.addEventListener('click',(event)=>{
+            if(highlight) highlight.remove()
+            
+            
             let index =Number( event.path[1].attributes[1].nodeValue);
-             let longitude = item.longitude
+            let longitude = item.longitude
             let latitude = item.latitude
-             view.goTo({
+           
+            view
+            .goTo({
                center: [longitude, latitude]
+              })
+              
+              view.whenLayerView(layer).then(function(layerView) {
+                
+                highlight = layerView.highlight(item.id-1);
+              });
             })
-        })        
-
-
-      });
-      return () => {
+          })        
+          view.ui.add(panelLayer, 'top-right')
+          
+          
+        });
+        return () => {
         if (view) {
           // destroy the map view
           view.container = null;
         }
       };
     });
-  });
+  },[]);
 
   return( 
   <div>
-    <div className = "panel-side esri-widget ">
+    {/* <div className = "panel-side esri-widget "> */}
     <div className = "panel" id = "panel"></div>
-    </div>
   <div className="webmap" ref={mapRef} />
-  </div>
+    </div>
+
   );
 }
