@@ -42,5 +42,6 @@ function reducer(state = initialState, action) {
 
 const store = createStore(reducer);
 
-
+// for the action add dispatch in your component
+ this.props.dispatch({ type: '' });
 
