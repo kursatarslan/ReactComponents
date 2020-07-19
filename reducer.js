@@ -1,7 +1,9 @@
+// actions example
 const SET_LOGIN_PENDING = "SET_LOGIN_PENDING";
 const SET_LOGIN_SUCCESS = "SET_LOGIN_SUCCESS";
 const SET_LOGIN_ERROR = "SET_LOGIN_ERROR";
 
+// can't work without thunk
 export function login(email, password) {
   return (dispatch) => {
     dispatch(setLoginPending(true));
@@ -39,7 +41,7 @@ function setLoginError(loginError) {
     loginError,
   };
 }
-
+//testing how it would work reacting to a request to a database
 function callLoginApi(email, password, callback) {
   setTimeout(() => {
     if (email === "admin@example.com" && password === "admin") {
@@ -49,7 +51,6 @@ function callLoginApi(email, password, callback) {
     }
   }, 1000);
 }
-
 export default function reducer(
   state = {
     isLoginSuccess: false,
